@@ -1,5 +1,5 @@
 /** Class for InputRow H5P widget */
-class InputRow extends H5P.EventDispatcher {
+class MemoryGameInputRow extends H5P.EventDispatcher {
 
   /**
    * @constructor
@@ -24,9 +24,32 @@ class InputRow extends H5P.EventDispatcher {
     // Let parent handle ready callbacks of children
     this.passReadies = true;
 
+    this.numberCards = 0;
+    this.list;
+    this.numberOverride;
+
+    // Get fields to listen to when form is ready
+    const topField = this.getTopField(this);
+    topField.ready(() => {
+      this.numberOverride = this.findField('behaviour/numCardsToUse', topField);
+      this.numberOverride.$input.change(() => {
+        this.handleCardsNumberChanged();
+      });
+
+      this.list = this.findField('cards', topField);
+      this.list.on('addedItem', () => {
+        this.handleCardsNumberChanged();
+      });
+      this.list.on('removedItem', () => {
+        this.handleCardsNumberChanged();
+      });
+
+      this.handleCardsNumberChanged();
+    });
+
     // Container
     this.$container = H5P.jQuery('<fieldset>', {
-      class: `field group field-name-${this.field.name} h5peditor-input-row expanded`
+      class: `field group field-name-${this.field.name} h5peditor-memory-game-input-row expanded`
     });
 
     // Title
@@ -37,7 +60,7 @@ class InputRow extends H5P.EventDispatcher {
 
     // Content
     const content = document.createElement('div');
-    content.classList.add('h5peditor-input-row-content');
+    content.classList.add('h5peditor-memory-game-input-row-content');
     this.$container.get(0).appendChild(content);
 
     // Description
@@ -50,7 +73,7 @@ class InputRow extends H5P.EventDispatcher {
 
     // Row
     const row = document.createElement('div');
-    row.classList.add('h5peditor-input-row-row');
+    row.classList.add('h5peditor-memory-game-input-row-row');
     content.appendChild(row);
 
     // Errors field
@@ -66,15 +89,7 @@ class InputRow extends H5P.EventDispatcher {
       this.params[field.name] = this.params[field.name] || field.default;
 
       const child = new H5PEditor.widgets[field.type](this, field, this.params[field.name], (field, value) => {
-        // Update values
-        this.params[field.name] = value;
-        this.setValue(this.field, this.params);
-
-        // Allow other widgets to listen to updates
-        this.trigger('changed', this.params);
-        this.changes.forEach(callback => {
-          callback(this.params);
-        });
+        this.handleChanged(field, value);
       });
 
       // Needs to be called here, because field is instantiated in appendTo(), not in constructor
@@ -120,6 +135,11 @@ class InputRow extends H5P.EventDispatcher {
       this.children.push(child);
     });
 
+    // Add custom error message field
+    this.memoryError = document.createElement('div');
+    this.memoryError.classList.add('h5p-errors');
+    this.$errors.get(0).append(this.memoryError);
+
     // Set values
     this.setValue(this.field, this.params);
   }
@@ -137,10 +157,40 @@ class InputRow extends H5P.EventDispatcher {
    * @return {boolean} True, if current value is valid, else false.
    */
   validate() {
-    return this.children.every((child) => {
+    this.memoryError.innerHTML = '';
+
+    const childrenAreValid = this.children.every((child) => {
       const valid = child.validate();
       return (typeof valid !== 'undefined' && valid !== false);
     });
+
+    if (!childrenAreValid) {
+      return false;
+    }
+
+    // Check if product of rows and columns is number of cards
+    try {
+      const keys = Object.keys(this.params);
+      const values = Object.values(this.params);
+
+      if (
+        values.every(value => value !== undefined) &&
+        this.numberCards * 2 / values[0] !== values[1]
+      ) {
+        throw H5PEditor.t(
+          'H5PEditor.MemoryGameInputRow',
+          'rowColumnsNotPossible',
+          {
+            ':rows': this.field.fields[0].label || keys[0],
+            ':columns': this.field.fields[1].label || keys[1]
+          });
+      }
+    }
+    catch (error) {
+      this.memoryError.innerHTML = H5PEditor.createError(error);
+    }
+
+    return (this.memoryError.innerHTML === '');
   }
 
   /**
@@ -149,5 +199,80 @@ class InputRow extends H5P.EventDispatcher {
   remove() {
     this.$container.remove();
   }
+
+  /**
+   * Get form top field.
+   */
+  getTopField(field) {
+    return (field.parent) ? this.getTopField(field.parent) : field;
+  }
+
+  /**
+   * Find field from path.
+   * @param {string} path Path.
+   * @param {object} parent Parent.
+   * @returns {@exp;ns.Form@call;findField|Boolean}
+   */
+  findField(path, parent) {
+    if (typeof path === 'string') {
+      path = path.split('/');
+    }
+
+    if (path[0] === '..') {
+      path.splice(0, 1);
+      return this.findField(path, parent.parent);
+    }
+    if (parent.children) {
+      for (var i = 0; i < parent.children.length; i++) {
+        if (
+          parent.children[i].field.name === path[0] ||
+          parent.children[i] instanceof H5PEditor.List && parent.children[i].getName() === path[0]
+        ) {
+          path.splice(0, 1);
+          if (path.length) {
+            return this.findField(path, parent.children[i]);
+          }
+          else {
+            return parent.children[i];
+          }
+        }
+      }
+    }
+
+    return false;
+  }
+
+  /**
+   * Handle number of cards changed. THIS IS NOT CONSIDERING MISSING IMAGES.
+   */
+  handleCardsNumberChanged() {
+    const numberOverride = this.numberOverride.$input.val() || 0;
+    const cards = this.list.getValue().length;
+
+    this.numberCards = (numberOverride < 3 || numberOverride > cards) ?
+      cards :
+      numberOverride;
+
+    this.validate();
+  }
+
+  /**
+   * Handle fields changed.
+   * @param {object} field Field that changed.
+   * @param {*} value Value of that field.
+   */
+  handleChanged(field, value) {
+    // Update values
+    this.params[field.name] = value;
+    this.setValue(this.field, this.params);
+
+    this.validate();
+
+    // Allow other widgets to listen to updates
+    this.trigger('changed', this.params);
+    this.changes.forEach(callback => {
+      callback(this.params);
+    });
+  }
 }
-export default InputRow;
+export default MemoryGameInputRow;

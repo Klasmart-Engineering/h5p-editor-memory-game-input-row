@@ -1,16 +1,15 @@
 {
-  "name": "h5p-editor-input-row",
-  "version": "0.1.0",
-  "description": "Start your own H5P editor widget",
+  "name": "h5p-editor-memory-game-input-row",
+  "version": "1.0.0",
+  "description": "Memory Game Input Row",
   "private": true,
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "cross-env NODE_ENV=production ./node_modules/.bin/webpack -p",
+    "build": "cross-env NODE_ENV=production ./node_modules/.bin/webpack",
     "watch": "./node_modules/.bin/webpack --watch"
   },
   "repository": {
-    "type": "git",
-    "url": "git+https://github.com/otacke/h5p-editor-input-row.git"
+    "type": "git"
   },
   "keywords": [
     "h5p",
@@ -19,18 +18,19 @@
   "author": "Oliver Tacke",
   "license": "MIT",
   "devDependencies": {
-    "@babel/cli": "^7.10.5",
-    "@babel/core": "^7.11.0",
-    "@babel/preset-env": "^7.11.0",
-    "babel-loader": "^8.0.6",
-    "babel-minify-webpack-plugin": "^0.3.1",
-    "cross-env": "^5.2.1",
-    "css-loader": "^1.0.1",
-    "file-loader": "^2.0.0",
-    "mini-css-extract-plugin": "^0.4.4",
-    "optimize-css-assets-webpack-plugin": "^5.0.3",
-    "resolve-url-loader": "^3.1.1",
-    "webpack": "^4.44.1",
-    "webpack-cli": "^3.3.12"
+    "@babel/cli": "^7.14.8",
+    "@babel/core": "^7.15.0",
+    "@babel/plugin-transform-destructuring": "^7.14.7",
+    "@babel/preset-env": "^7.15.0",
+    "babel-loader": "^8.2.2",
+    "cross-env": "^7.0.3",
+    "css-loader": "^6.2.0",
+    "eslint": "^7.32.0",
+    "mini-css-extract-plugin": "^2.2.0",
+    "sass": "^1.37.5",
+    "regenerator-runtime": "^0.13.9",
+    "sass-loader": "^12.1.0",
+    "webpack": "^5.50.0",
+    "webpack-cli": "^4.7.2"
   }
 }

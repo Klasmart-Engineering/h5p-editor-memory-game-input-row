@@ -1,5 +1,5 @@
 {
   "libraryStrings": {
-    "foo": "bar"
+    "rowColumnsNotPossible": "The product of the value for \":rows\" and the value for \":columns\" must be the number of cards."
   }
 }
