@@ -44,6 +44,12 @@ class MemoryGameInputRow extends H5P.EventDispatcher {
         this.handleCardsNumberChanged();
       });
 
+      this.squareSelector = this.findField('behaviour/useGrid', topField);
+      this.squareSelector.$input.change(() => {
+        this.handleSquareSelectorChanged();
+      });
+
+      this.handleSquareSelectorChanged();
       this.handleCardsNumberChanged();
     });
 
@@ -266,6 +272,13 @@ class MemoryGameInputRow extends H5P.EventDispatcher {
     this.params[field.name] = value;
     this.setValue(this.field, this.params);
 
+    // Unset selector for square layout
+    this.children.forEach(child => {
+      if (child.$input.val() !== '') {
+        this.squareSelector.$input.get(0).checked = false;
+      }
+    });
+
     this.validate();
 
     // Allow other widgets to listen to updates
@@ -273,6 +286,18 @@ class MemoryGameInputRow extends H5P.EventDispatcher {
     this.changes.forEach(callback => {
       callback(this.params);
     });
+  }
+
+  /**
+   * Handle setting for square changed.
+   */
+  handleSquareSelectorChanged() {
+    if (this.squareSelector.$input.get(0).checked) {
+      // Remove rows/columns selection values
+      this.children.forEach(child => {
+        child.$input.val('');
+      });
+    }
   }
 }
 export default MemoryGameInputRow;
