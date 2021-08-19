@@ -167,7 +167,7 @@ class MemoryGameInputRow extends H5P.EventDispatcher {
 
     const childrenAreValid = this.children.every((child) => {
       const valid = child.validate();
-      return (typeof valid !== 'undefined' && valid !== false);
+      return (valid !== false);
     });
 
     if (!childrenAreValid) {
@@ -180,8 +180,8 @@ class MemoryGameInputRow extends H5P.EventDispatcher {
       const values = Object.values(this.params);
 
       if (
-        values.every(value => value !== undefined) &&
-        this.numberCards * 2 / values[0] !== values[1]
+        (this.numberCards * 2 / values[0]) % 1 !== 0 ||
+        (this.numberCards * 2 / values[1]) % 1 !== 0
       ) {
         throw H5PEditor.t(
           'H5PEditor.MemoryGameInputRow',
