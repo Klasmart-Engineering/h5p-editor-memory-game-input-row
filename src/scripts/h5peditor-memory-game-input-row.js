@@ -279,6 +279,22 @@ class MemoryGameInputRow extends H5P.EventDispatcher {
       }
     });
 
+    // Set other field
+    if (this.numberCards * 2 / this.params['rows'] !== this.params['columns']) {
+      if (field.name === 'rows') {
+        const otherValue = this.numberCards * 2 / value;
+        if (otherValue % 1 === 0) {
+          this.children[1].$input.val(otherValue).change();
+        }
+      }
+      else {
+        const otherValue = this.numberCards * 2 / value;
+        if (otherValue % 1 === 0) {
+          this.children[0].$input.val(otherValue).change();
+        }
+      }
+    }
+
     this.validate();
 
     // Allow other widgets to listen to updates
