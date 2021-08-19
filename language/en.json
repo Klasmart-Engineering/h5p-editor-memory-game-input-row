@@ -1,5 +1,5 @@
 {
   "libraryStrings": {
-    "rowColumnsNotPossible": "The product of the value for \":rows\" and the value for \":columns\" must be the number of cards."
+    "rowColumnsNotPossible": "The result of multiplying the value for \":rows\" and the value for \":columns\" must be the same as the double of card count."
   }
 }
