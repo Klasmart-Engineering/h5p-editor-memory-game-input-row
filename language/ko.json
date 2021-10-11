@@ -1,0 +1,5 @@
+{
+  "libraryStrings": {
+    "rowColumnsNotPossible": "\":rows\" 값과 \":columns\" 값을 곱한 수는 카드 수의 두 배와 같아야 합니다."
+  }
+}
