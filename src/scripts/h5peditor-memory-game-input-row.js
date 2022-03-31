@@ -180,9 +180,13 @@ class MemoryGameInputRow extends H5P.EventDispatcher {
       const values = Object.values(this.params);
 
       if (
-        (this.numberCards * 2 / values[0]) % 1 !== 0 ||
-        (this.numberCards * 2 / values[1]) % 1 !== 0
+        (values[0] !== undefined || values[1] !== undefined) &&
+        (
+          (this.numberCards * 2 / values[0]) % 1 !== 0 ||
+          (this.numberCards * 2 / values[1]) % 1 !== 0
+        )
       ) {
+
         throw H5PEditor.t(
           'H5PEditor.MemoryGameInputRow',
           'rowColumnsNotPossible',
